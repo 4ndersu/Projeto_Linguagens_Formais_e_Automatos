@@ -89,8 +89,8 @@ int validarEntradaDuplicacao(char entrada[]) {
     }
     
     //Verifica se a entrada é muito grande para duplicação
-    if (strlen(entrada) > (TAM - 2) / 3){ 
-        return 0;   //166 com TAM 500
+    if (strlen(entrada) > (TAM - 3) / 2){ 
+        return 0;   //248 com TAM 500
     }
 
     //Verifica se todos os caracteres da entrada são '1'
@@ -102,49 +102,6 @@ int validarEntradaDuplicacao(char entrada[]) {
     }
     //Se passou por todas as verificações, a entrada é válida
     return 1;
-}
-
-//Configura as regras de duplicacao da maquina
-void configurarDuplicacao() {
-    //Reinicia a quantidade de transicoes para evitar duplicatas
-    quantidadeTransicoes = 0;
-
-    //1. Vai ate o fim da entrada original e coloca '#'
-    adicionar("q0", '1', '1', 'R', "q0");
-    adicionar("q0", 'B', '#', 'L', "q1");
-
-    //2. Volta ate o inicio da fita ('B' na posicao 0)
-    adicionar("q1", '1', '1', 'L', "q1");
-    adicionar("q1", 'B', 'B', 'R', "q2");
-
-    //3. Procura o proximo '1' antes do '#' para marcar com 'X'
-    adicionar("q2", 'X', 'X', 'R', "q2");
-    adicionar("q2", '1', 'X', 'R', "q3");
-    adicionar("q2", '#', '#', 'L', "q5"); // acabou!
-
-    //4. Avanca ate o primeiro 'B' depois do '#' e escreve um '1'
-    adicionar("q3", '1', '1', 'R', "q3");
-    adicionar("q3", '#', '#', 'R', "q3");
-    adicionar("q3", 'B', '1', 'L', "q4");
-
-    //5. Volta ate o 'B' inicial (posicao 0) para pegar o proximo '1'
-    adicionar("q4", '1', '1', 'L', "q4");
-    adicionar("q4", '#', '#', 'L', "q4");
-    adicionar("q4", 'X', 'X', 'L', "q4");
-    adicionar("q4", 'B', 'B', 'R', "q2");
-
-    //6. Volta ate o 'B' inicial para restaurar tudo
-    adicionar("q5", 'X', 'X', 'L', "q5");
-    adicionar("q5", 'B', 'B', 'R', "q6");
-
-    //7. Restaura 'X' -> '1', troca '#' -> '1' e vai apagar o ultimo '1'
-    adicionar("q6", 'X', '1', 'R', "q6");
-    adicionar("q6", '#', '1', 'R', "q6");
-    adicionar("q6", '1', '1', 'R', "q6");
-    adicionar("q6", 'B', 'B', 'L', "q7");
-
-    //8. Apaga o ultimo '1' (que compensa o '#' virando '1') e finaliza
-    adicionar("q7", '1', 'B', 'R', "qf");
 }
 
 // Inicializa a fita e o cabecote
@@ -331,13 +288,22 @@ int main() {
         configurarAdicao(); //Carrega as regras da adicao
 
     } else {
-        //Solicita ao usuario que digite o numero em unario e valida a entrada
+//Solicita ao usuario que digite o numero em unario e valida a entrada
         printf("Digite o numero em unario (apenas 1): ");
         if (scanf("%998s", entrada) != 1 || !validarEntradaDuplicacao(entrada)) {
-            printf("Entrada invalida! Use apenas 1.\n");
+            printf("Entrada invalida! Use apenas 1 (de 1 a %d).\n", (TAM - 3) / 2);
             return 1;
         }
-        configurarDuplicacao(); // carrega as regras da duplicacao
+
+        //Monta a entrada da adicao: 1^n + 1^n (duplicar = somar n com ele mesmo)
+        char copia[999];
+        strcpy(copia, entrada);
+        strcat(entrada, "+");
+        strcat(entrada, copia);
+
+        //Reutiliza a maquina de adicao
+        configurarAdicao();
+        opcao = 1; //Exibicao da fita igual a da adicao
     }
 
     //Inicializa a maquina com a entrada fornecida pelo usuario e a executa
