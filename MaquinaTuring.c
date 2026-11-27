@@ -80,30 +80,6 @@ int buscarTransicao(char estado[], char simbolo, Transicao *resultado) {
     return 0;
 }
 
-// Valida entrada para duplicacao unaria: apenas '1' (nao vazio)
-int validarEntradaDuplicacao(char entrada[]) {
-    
-    //Verifica se a entrada está vazia
-    if (entrada[0] == '\0') {
-        return 0;
-    }
-    
-    //Verifica se a entrada é muito grande para duplicação
-    if (strlen(entrada) > (TAM - 3) / 2){ 
-        return 0;   //248 com TAM 500
-    }
-
-    //Verifica se todos os caracteres da entrada são '1'
-    for (int i = 0; entrada[i] != '\0'; i++) {
-        //Se encontrar algum caractere diferente de '1', retorna inválido
-        if (entrada[i] != '1') {
-            return 0;
-        }
-    }
-    //Se passou por todas as verificações, a entrada é válida
-    return 1;
-}
-
 // Inicializa a fita e o cabecote
 void inicializar(MaquinaTuring *m, char entrada[]) {
 
@@ -236,6 +212,30 @@ int validarEntrada(char entrada[]) {
     return quantidadeMais == 1;
 }
 
+// Valida entrada para duplicacao unaria: apenas '1' (nao vazio)
+int validarEntradaDuplicacao(char entrada[]) {
+    
+    //Verifica se a entrada está vazia
+    if (entrada[0] == '\0') {
+        return 0;
+    }
+    
+    //Verifica se a entrada é muito grande para duplicação
+    if (strlen(entrada) > (TAM - 3) / 2){ 
+        return 0;   //248 com TAM 500
+    }
+
+    //Verifica se todos os caracteres da entrada são '1'
+    for (int i = 0; entrada[i] != '\0'; i++) {
+        //Se encontrar algum caractere diferente de '1', retorna inválido
+        if (entrada[i] != '1') {
+            return 0;
+        }
+    }
+    //Se passou por todas as verificações, a entrada é válida
+    return 1;
+}
+
 //Mostra o resultado da adicao
 void mostrarResultado(MaquinaTuring *m) {
     
@@ -288,19 +288,20 @@ int main() {
         configurarAdicao(); //Carrega as regras da adicao
 
     } else {
-//Solicita ao usuario que digite o numero em unario e valida a entrada
+        //Solicita ao usuario que digite o numero em unario e valida a entrada
         printf("Digite o numero em unario (apenas 1): ");
         if (scanf("%998s", entrada) != 1 || !validarEntradaDuplicacao(entrada)) {
             printf("Entrada invalida! Use apenas 1 (de 1 a %d).\n", (TAM - 3) / 2);
             return 1;
         }
 
-        //Monta a entrada da adicao: 1^n + 1^n (duplicar = somar n com ele mesmo)
+        //Monta a entrada da adicao: 1^n + 1^n, para somar o numero consigo mesmo
         char copia[999];
         strcpy(copia, entrada);
         strcat(entrada, "+");
         strcat(entrada, copia);
 
+        validarEntrada(entrada); //Valida a entrada da adicao
         //Reutiliza a maquina de adicao
         configurarAdicao();
         opcao = 1; //Exibicao da fita igual a da adicao
